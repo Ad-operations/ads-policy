@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verdict Desk: Night Souk</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14122a;--card:#221f3d;--ink:#f2eefc;--mut:#a9a3c9;--line:#40396b;--gold:#f2b73f;--ok:#58c79f;--bad:#ef8d7f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 "Source Sans 3",system-ui,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:12px}
+h1{font:700 1.3rem Sora,system-ui,sans-serif;margin:0 0 6px}
+#hud{display:flex;gap:18px;flex-wrap:wrap;color:var(--mut);margin-bottom:8px}#hud b{color:var(--gold)}
+#wrap{position:relative}
+canvas{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;background:#1d1b34}
+#ui{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,8,24,.72);border-radius:10px;padding:10px;overflow:auto}
+.pn{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;max-width:600px;width:100%;max-height:100%;overflow:auto}
+.pn h3{font:700 1.05rem Sora,system-ui,sans-serif;margin:14px 0 8px}
+.ad{font:700 1.1rem Sora,system-ui,sans-serif;border-left:4px solid var(--gold);padding-left:12px}
+.mt{color:var(--mut);font-size:.92rem;margin:8px 0 0}
+.opt,.btn{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:#2c2850;border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--gold)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opt.ok{border-color:var(--ok);background:#12332a}.opt.bad{border-color:var(--bad);background:#3a1d19}
+.btn{width:auto;background:var(--gold);color:#1b1630;font-weight:600;border:0;margin-top:12px}
+a{color:var(--gold)}
+.pass{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.st{border:2px dashed var(--line);border-radius:8px;padding:8px;text-align:center;color:var(--mut)}.st.on{border:2px solid var(--gold);color:var(--gold)}
+.note{color:var(--mut);font-size:.85rem;margin-top:10px}
+
+body{background:radial-gradient(1200px 600px at 50% -10%,#2a2150 0%,#14122a 60%) fixed}
+#hud{gap:10px}.pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:3px 14px}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18);display:inline-block}.dot.ok{background:#58c79f;box-shadow:0 0 8px #58c79f}.dot.bad{background:#ef8d7f;box-shadow:0 0 8px #ef8d7f}
+canvas{border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 60px rgba(242,183,63,.08)}
+#ui{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.pn{background:rgba(30,26,58,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.16);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.55);animation:pop .25s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.opt{background:rgba(255,255,255,.06);border-radius:12px;transition:transform .12s,border-color .12s,background .12s}.opt:hover:not(:disabled){transform:translateY(-1px);background:rgba(255,255,255,.1)}
+.btn{border-radius:12px;box-shadow:0 6px 18px rgba(242,183,63,.3)}.ad{background:rgba(255,255,255,.05);border-radius:0 10px 10px 0;padding:8px 12px}
+@media(prefers-reduced-motion:reduce){.pn{animation:none}.opt{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Verdict Desk: Night Souk</h1>
+<div id="hud"></div>
+<div id="wrap"><canvas id="c" width="1920" height="1080"></canvas><div id="ui"></div></div>
+<p class="note">Move with WASD or arrow keys. Press E or click a stall to inspect it. The shift clock is cosmetic and never penalizes slow, correct work. Scenarios are synthetic; verdicts follow Google policy text retrieved 11 Oct 2026, so confirm against live pages.</p>
+</main>
+<script>
+var V=["Approved","Eligible (limited)","Disapproved","Escalate to policy team"];
+var AL="https://support.google.com/adspolicy/answer/6012382",RW="https://www.relevantaudience.com/google-ads-en/google-alcohol-advertising-policy-update-september-2026/";
+var C=[
+{k:"Alcohol",col:"#d98a1f",ad:"Long Island Iced Tea. Ready to drink, served ice cold.",mk:["Egypt"],ac:"Drinks brand",q:"What is this product, really?",qo:["A tea beverage","A mixed alcoholic cocktail","A non-alcoholic soda"],qa:1,va:2,
+ro:["This violates alcohol policy.","Alcohol ads are not allowed in Egypt, and this is an alcoholic cocktail despite its name. Remove Egypt from targeting.","Your tea ad is fine. Resubmit."],ra:1,
+why:"The name hides the product. Google restricts alcohol and drinks that resemble it, and Egypt is among countries where alcohol advertising is strictly prohibited.",src:[["Alcohol policy",AL],["Sept 2026 rewrite (secondary)",RW]]},
+{k:"Alcohol 0%",col:"#e0c04a",ad:"Zero-proof gin alternative, 0.0% alcohol. Now in Egypt.",mk:["Egypt"],ac:"0% alcohol application: not on file",q:"Do alcohol rules touch a 0.0% product?",qo:["No: 0% means no alcohol rules","Yes, in Egypt, India and Indonesia 0% alternatives need an application","Yes: it is treated exactly like gin"],qa:1,va:2,
+ro:["Zero-proof gin is still alcohol. Account at risk.","0% alternatives in Egypt need the 0% alcohol advertising application (effective 30 Sept 2026). Complete it, then resubmit. Violations are treated as egregious.","Fine for Egypt. Approved."],ra:1,
+why:"Per the rewrite effective 30 Sept 2026, 0% alternatives in Egypt, India or Indonesia need a dedicated application, and violations are considered egregious. Confirm the live wording.",src:[["Alcohol policy",AL],["Sept 2026 rewrite (secondary)",RW]]},
+{k:"Dangerous products",col:"#5a9f4a",ad:"Sparkling hemp-THC social tonic. Alcohol-free. Feel the lift.",mk:["United Arab Emirates"],ac:"Beverage brand",q:"Which policy owns this ad?",qo:["Alcohol, because it is a drink","Dangerous products, because it contains THC","Healthcare, because it is a tonic"],qa:1,va:2,
+ro:["Alcohol-free drinks are fine. Approved.","This drink contains THC, so it is reviewed under Dangerous products, not as an alcohol-free drink, and can't run.","Add an age gate and resubmit."],ra:1,
+why:"The rewritten alcohol policy puts drinks containing THC or other regulated substances under the stricter Dangerous products policy, even when marketed alcohol-free.",src:[["Dangerous products","https://support.google.com/adspolicy/answer/6014299"],["Sept 2026 rewrite (secondary)",RW]]},
+{k:"Dating",col:"#c45a8a",ad:"Meet singles near you. Free app, verified profiles.",mk:["Saudi Arabia","Kuwait","Germany"],ac:"Dating certificate: held",q:"What decides this ad's status?",qo:["The imagery alone","Which countries are targeted","The language of the ad"],qa:1,va:1,
+ro:["Dating content violates policy. Rejected.","This can run in Germany but not in Saudi Arabia or Kuwait, where dating ads are restricted. The creative needs no change.","Approved in all targeted countries."],ra:1,
+why:"Dating ads are restricted only in a named country list that includes Saudi Arabia and Kuwait, so a mixed campaign is Eligible (limited). A secondary report counted 17 countries while the official page names 18: read the live page.",src:[["Dating policy update","https://support.google.com/adspolicy/answer/16473212"]]},
+{k:"Healthcare",col:"#3f8fb0",ad:"See an online doctor in minutes. Voiceover: \"Get your prescription delivered.\" (A prescription drug is named only in the voiceover.)",mk:["Saudi Arabia","Kuwait","Bahrain"],ac:"No healthcare certification on file",q:"Where does the violation sit?",qo:["In the on-screen text","In the voiceover and the service itself","In the page colors"],qa:1,va:2,
+ro:["This violates healthcare policy.","Online prescribing needs Google healthcare certification, and a drug is named in your voiceover. Saudi Arabia, Kuwait and Bahrain also have location-specific rules. Get certified and check each country first.","On-screen text is clean. Approved."],ra:1,
+why:"Prescription drug services require certification. These countries appear in the location list on Google's Shopping healthcare page; confirm the Ads policy's own country table.",src:[["Healthcare and medicines","https://support.google.com/adspolicy/answer/176031"]]},
+{k:"Sexual content",col:"#8a5fc0",ad:"Silk lingerie collection. Sensually posed model.",mk:["Saudi Arabia","United Kingdom"],ac:"Fashion retailer",q:"What should drive your call?",qo:["Your own cultural view of lingerie","Local laws and user settings, per Google's live country lists","Whether the model looks adult"],qa:1,va:1,
+ro:["Lingerie is adult in the Middle East. Disapproved everywhere.","This serves only where local law and Google's country lists allow, and only to eligible users: Eligible (limited). The creative is not disapproved.","Approved with no limits."],ra:1,
+why:"Suggestive content serves only in limited scenarios based on age, SafeSearch and local laws. Cultural judgment belongs in the meaning note, not the verdict. I did not retrieve the country lists; a live card must.",src:[["Sexual content","https://support.google.com/adwords/answer/116446"]]}];
+var Z=["Spice Lane","Lantern Row","Clinic Alley"];
+var S=[[0,50,115],[1,180,350],[3,400,115],[5,470,360],[4,720,115],[2,780,360]].map(function(a,i){return{k:a[0],x:a[1],y:a[2],w:120,h:80,z:i>>1,done:false,ok:false}});
+var P={x:40,y:300,r:10},keys={},mode="story",solved=0,pts=0,el=0,cs=null,lock=false,Cv=document.getElementById("c"),X=Cv.getContext("2d"),ui=document.getElementById("ui"),hud=document.getElementById("hud");
+function gates(){return[solved<2?316:-1,solved<4?636:-1]}
+function panel(h){ui.innerHTML='<div class="pn">'+h+'</div>';ui.style.display="flex"}
+function hide(){ui.style.display="none";ui.innerHTML=""}
+function say(w,t,cb,b){if(mode==="play")mode="story";panel("<b>"+w+"</b><p>"+t+'</p><button class="btn" id="ok">'+(b||"Continue")+"</button>");var o=document.getElementById("ok");o.onclick=function(){hide();mode=mode==="story"?"play":mode;cb&&cb()};o.focus()}
+function openCase(s){if(s.done||mode!=="play")return;mode="case";cs={s:s,c:C[s.k],st:0,vo:false};step()}
+function step(){var c=cs.c,st=cs.st,q,o,h='<div class="ad">'+c.ad+'</div><p class="mt">Markets: '+c.mk.join(", ")+"<br>Account: "+c.ac+"</p>";
+ if(st===0){q="Meaning note: "+c.q;o=c.qo}else if(st===1){q="Your verdict";o=V}else{q="Which reply do you send?";o=c.ro}
+ panel(h+"<h3>"+q+"</h3>"+o.map(function(t,i){return'<button class="opt" data-n="'+i+'">'+t+"</button>"}).join("")+'<div id="fb"></div>');lock=false}
+ui.addEventListener("click",function(e){var b=e.target.closest(".opt");if(!b||lock||mode!=="case")return;lock=true;var n=+b.dataset.n,st=cs.st,a=[cs.c.qa,cs.c.va,cs.c.ra][st],ok=n===a;
+ ui.querySelectorAll(".opt").forEach(function(x,j){x.disabled=true;if(j===a)x.classList.add("ok");else if(j===n)x.classList.add("bad")});
+ if(ok)pts+=[1,2,1][st];if(st===1)cs.vo=ok;
+ document.getElementById("fb").innerHTML='<button class="btn" id="nx">'+(st===2?"See why":"Continue")+"</button>";var nx=document.getElementById("nx");nx.focus();
+ nx.onclick=function(){if(st<2){cs.st++;step()}else why()}});
+function why(){var c=cs.c;panel("<b>Why</b><p>"+c.why+"</p><p>"+c.src.map(function(x){return'<a href="'+x[1]+'" target="_blank" rel="noopener">'+x[0]+"</a>"}).join(" | ")+'</p><button class="btn" id="hg">Hang the verdict lantern</button>');
+ var b=document.getElementById("hg");b.focus();b.onclick=function(){cs.s.done=true;cs.s.ok=cs.vo;burst(cs.s);solved++;hide();mode="play";beat()}}
+function beat(){
+ if(solved===2)say("Noor","Spice Lane is calm. The gate to Lantern Row is open. Here the same words mean different things in different countries.");
+ else if(solved===4)say("Noor","Clinic Alley is the last stretch before dawn. Look for what is said, not just what is shown.");
+ else if(solved===6){mode="end";var m=S.map(function(s){return'<div class="st'+(s.ok?" on":"")+'">'+C[s.k].k+"</div>"}).join("");
+  panel("<b>Dawn over the souk</b><p>Noor: The lanterns are hung and the lanes are quiet. You read meaning, checked the market, then ruled.</p><p><b>"+pts+" / 24</b> points. A stamp means your verdict was right.</p><div class=\"pass\">"+m+'</div><button class="btn" id="rp">Walk the souk again</button>');document.getElementById("rp").onclick=reset}}
+function reset(){S.forEach(function(s){s.done=false;s.ok=false});P.x=40;P.y=300;solved=0;pts=0;el=0;hide();mode="play"}
+function near(){var b=null,d=99;S.forEach(function(s){var dx=Math.max(s.x-P.x,0,P.x-(s.x+s.w)),dy=Math.max(s.y-P.y,0,P.y-(s.y+s.h)),q=Math.hypot(dx,dy);if(q<d){d=q;b=s}});return d<70?b:null}
+addEventListener("keydown",function(e){var k=e.key.toLowerCase();if(["arrowup","arrowdown","arrowleft","arrowright"," "].indexOf(k)>-1&&mode==="play")e.preventDefault();keys[k]=1;if((k==="e"||k===" ")&&mode==="play"){var n=near();if(n)openCase(n)}});
+addEventListener("keyup",function(e){keys[e.key.toLowerCase()]=0});
+Cv.addEventListener("click",function(e){if(mode!=="play")return;var r=Cv.getBoundingClientRect(),mx=(e.clientX-r.left)*960/r.width,my=(e.clientY-r.top)*540/r.height;S.forEach(function(s){if(mx>s.x&&mx<s.x+s.w&&my>s.y&&my<s.y+s.h&&near()===s)openCase(s)})});
+function blocked(x,y){var g=gates();for(var i=0;i<2;i++)if(g[i]>0&&x+P.r>g[i]&&x-P.r<g[i]+8)return true;
+ for(var j=0;j<S.length;j++){var s=S[j];if(x+P.r>s.x&&x-P.r<s.x+s.w&&y+P.r>s.y&&y-P.r<s.y+s.h)return true}return x<P.r||x>960-P.r||y<50||y>540-P.r}
+var last=0;
+function loop(t){var dt=Math.min((t-last)/1000,.05);last=t;DT=dt;
+ if(mode==="play"){el+=dt;var dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
+  if(dx&&dy){dx*=.707;dy*=.707}var nx=P.x+dx*170*dt,ny=P.y+dy*170*dt;if(!blocked(nx,P.y))P.x=nx;if(!blocked(P.x,ny))P.y=ny}
+ draw(t/1000);requestAnimationFrame(loop)}
+var DT=.016,F=[],PT=[],BG=null,hc="",SK=[["#ff9a5a","#6b3f86"],["#0a0e2e","#2a1f63"],["#ffa7b4","#ffe0a8"]];
+for(var i=0;i<40;i++)F.push({x:Math.random()*960,y:70+Math.random()*460,s:.4+Math.random(),a:Math.random()*6});
+for(i=0;i<60;i++)PT.push({l:0,x:0,y:0,vx:0,vy:0,c:"#fff"});
+function hx(h){return[1,3,5].map(function(i){return parseInt(h.substr(i,2),16)})}
+function mix(a,b,t){var A=hx(a),B=hx(b);return"#"+A.map(function(v,i){return("0"+Math.round(v+(B[i]-v)*t).toString(16)).slice(-2)}).join("")}
+function pal(p){var s=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5;return[mix(SK[s][0],SK[s+1][0],t),mix(SK[s][1],SK[s+1][1],t)]}
+function glow(x,y,r,c,a){var g=X.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,c);g.addColorStop(1,"rgba(0,0,0,0)");X.globalAlpha=Math.max(0,Math.min(1,a));X.globalCompositeOperation="lighter";X.fillStyle=g;X.fillRect(x-r,y-r,2*r,2*r);X.globalCompositeOperation="source-over";X.globalAlpha=1}
+function rr(x,y,w,h,r){X.beginPath();X.moveTo(x+r,y);X.arcTo(x+w,y,x+w,y+h,r);X.arcTo(x+w,y+h,x,y+h,r);X.arcTo(x,y+h,x,y,r);X.arcTo(x,y,x+w,y,r);X.closePath()}
+function burst(s){var n=0;for(var i=0;i<PT.length&&n<28;i++){var q=PT[i];if(q.l<=0){var a=Math.random()*6.28,v=40+Math.random()*90;q.x=s.x+s.w/2;q.y=s.y-34;q.vx=Math.cos(a)*v;q.vy=Math.sin(a)*v-30;q.l=1;q.c=s.ok?"#58c79f":"#ef8d7f";n++}}}
+function mkBG(){var b=document.createElement("canvas");b.width=1920;b.height=1080;var o=X;X=b.getContext("2d");X.scale(2,2);
+ for(var i=0;i<24;i++){var bx=i*42,h=14+((i*37)%5)*6;X.fillStyle="rgba(10,8,30,.92)";X.fillRect(bx,50-h,38,h);if(i%4===0){X.beginPath();X.arc(bx+19,50-h,14,Math.PI,0);X.fill()}if(i%7===3){X.fillRect(bx+17,50-h-24,4,24);X.beginPath();X.arc(bx+19,50-h-26,3,0,7);X.fill()}
+  X.fillStyle="rgba(255,210,122,.55)";for(var j=0;j<3;j++)if((i*7+j*3)%5<2)X.fillRect(bx+6+j*10,50-h+6,3,4)}
+ var g=X.createLinearGradient(0,50,0,540);g.addColorStop(0,"#322a5c");g.addColorStop(1,"#171331");X.fillStyle=g;X.fillRect(0,50,960,490);
+ X.strokeStyle="rgba(255,255,255,.045)";X.lineWidth=1;for(i=0;i<=960;i+=40){X.beginPath();X.moveTo(i,50);X.lineTo(i,540);X.stroke()}for(i=50;i<=540;i+=41){X.beginPath();X.moveTo(0,i);X.lineTo(960,i);X.stroke()}
+ ["rgba(217,138,31,.08)","rgba(196,90,138,.08)","rgba(63,143,176,.08)"].forEach(function(c,z){X.fillStyle=c;X.fillRect(z*320,50,320,490);X.fillStyle="#f2eefc";rr(z*320+12,58,128,24,12);X.fillStyle="rgba(255,255,255,.1)";X.fill();X.strokeStyle="rgba(255,255,255,.18)";X.stroke();X.fillStyle="#f2eefc";X.font="700 13px Sora,system-ui,sans-serif";X.fillText(Z[z],z*320+26,75)});
+ X=o;BG=b}
+function mins(){return Math.min(1080+el*.5+solved*70,1795)}
+function draw(t){X.setTransform(2,0,0,2,0,0);
+ var m=mins(),p=Math.min(Math.max((m-1080)/720,0),.99),pl=pal(p),nf=Math.sin(p*Math.PI),sg=X.createLinearGradient(0,0,0,140);sg.addColorStop(0,pl[0]);sg.addColorStop(1,pl[1]);X.fillStyle=sg;X.fillRect(0,0,960,540);
+ if(nf>.2){X.fillStyle="#fff";for(var i=0;i<36;i++){X.globalAlpha=nf*(.35+.35*Math.sin(t*2+i));X.fillRect((i*97)%960,(i*53)%40+2,1.5,1.5)}X.globalAlpha=1}
+ X.drawImage(BG,0,0,960,540);
+ for(var z=0;z<3;z++){var x0=z*320;X.strokeStyle="rgba(255,255,255,.22)";X.lineWidth=1;X.beginPath();X.moveTo(x0,52);X.quadraticCurveTo(x0+160,92,x0+320,52);X.stroke();
+  for(var k=1;k<7;k++){var u=k/7;glow(x0+320*u,52*(1-u)*(1-u)+184*u*(1-u)+52*u*u+2,16,["#ffd27a","#ff8fb0","#7fe0ff"][(k+z)%3],.55+.4*Math.sin(t*3+k*2+z))}}
+ S.forEach(function(s,i){var c=C[s.k],cx=s.x+s.w/2,lc=s.done?(s.ok?"#58c79f":"#ef8d7f"):"#f2b73f",fl=s.done?1:.75+.25*Math.sin(t*6+i*2),cy=s.y-34;
+  X.fillStyle="rgba(0,0,0,.35)";X.beginPath();X.ellipse(cx,s.y+s.h+4,s.w/2+8,8,0,0,7);X.fill();glow(cx,s.y+s.h+34,95,lc,.2);
+  var bg=X.createLinearGradient(0,s.y,0,s.y+s.h);bg.addColorStop(0,"#3d3568");bg.addColorStop(1,"#241f45");rr(s.x,s.y,s.w,s.h,8);X.fillStyle=bg;X.fill();X.strokeStyle="rgba(255,255,255,.12)";X.stroke();
+  for(var a=0;a<5;a++){X.fillStyle=a%2?c.col:"#f2eefc";X.beginPath();X.arc(s.x+16+a*22,s.y+s.h-12,5,0,7);X.fill()}
+  rr(s.x+8,s.y+22,s.w-16,20,10);X.fillStyle="rgba(0,0,0,.4)";X.fill();X.fillStyle="#f2eefc";X.font="600 "+(c.k.length>12?10:12)+"px Source Sans 3,system-ui,sans-serif";X.textAlign="center";X.fillText(c.k,cx,s.y+36);
+  for(a=0;a<6;a++){var x1=s.x+a*20;X.fillStyle=a%2?"#f2eefc":c.col;X.fillRect(x1,s.y-14,20,18);X.beginPath();X.arc(x1+10,s.y+4,10,0,Math.PI);X.fill()}
+  X.strokeStyle="rgba(255,255,255,.45)";X.beginPath();X.moveTo(cx,s.y-14);X.lineTo(cx,cy-12);X.stroke();glow(cx,cy,46,lc,.5*fl);
+  rr(cx-9,cy-12,18,24,8);X.fillStyle=lc;X.globalAlpha=fl;X.fill();X.globalAlpha=1;X.fillStyle="rgba(255,255,255,.45)";X.beginPath();X.ellipse(cx-2,cy-3,3,6,0,0,7);X.fill();X.fillStyle="#1b1630";X.fillRect(cx-6,cy-14,12,3);X.fillRect(cx-6,cy+11,12,3);
+  if(s.done){X.font="700 12px Sora,system-ui,sans-serif";X.fillText(s.ok?"\u2713":"\u2715",cx,cy+4)}X.textAlign="left"});
+ var gt=gates();for(var q=0;q<2;q++)if(gt[q]>0){var gx=gt[q]+4,gr=X.createLinearGradient(gx-18,0,gx+18,0);gr.addColorStop(0,"rgba(255,210,122,0)");gr.addColorStop(.5,"rgba(255,210,122,"+(.35+.15*Math.sin(t*3))+")");gr.addColorStop(1,"rgba(255,210,122,0)");X.fillStyle=gr;X.fillRect(gx-18,50,36,490);X.fillStyle="rgba(255,236,190,.85)";X.fillRect(gx-1,50,2,490);
+  rr(gx-9,290,18,14,4);X.fillStyle="#f2b73f";X.fill();X.strokeStyle="#f2b73f";X.lineWidth=2;X.beginPath();X.arc(gx,290,5,Math.PI,0);X.stroke();X.lineWidth=1}
+ F.forEach(function(f){f.y-=f.s*8*DT;f.x+=Math.sin(t+f.a)*10*DT;if(f.y<56){f.y=535;f.x=Math.random()*960}glow(f.x,f.y,7,"#ffe9a8",.3+.3*Math.sin(t*3+f.a))});
+ var nb=Math.sin(t*2)*1.5;X.fillStyle="rgba(0,0,0,.3)";X.beginPath();X.ellipse(80,262,11,4,0,0,7);X.fill();glow(92,250+nb,30,"#ffb35a",.5);
+ rr(71,236+nb,18,26,8);X.fillStyle="#8a5fc0";X.fill();X.fillStyle="#f3d3b0";X.beginPath();X.arc(80,230+nb,6.5,0,7);X.fill();X.fillStyle="#5a3a86";X.beginPath();X.arc(80,229+nb,7,Math.PI,0);X.fill();X.fillStyle="#ffd27a";X.beginPath();X.arc(93,250+nb,4,0,7);X.fill();
+ X.fillStyle="#f2eefc";X.font="600 12px Source Sans 3,system-ui,sans-serif";X.textAlign="center";X.fillText("Noor",80,282);if(solved===0&&mode!=="end"){X.fillStyle="#f2b73f";X.font="700 16px Sora,system-ui,sans-serif";X.fillText("!",80,214+nb-Math.abs(Math.sin(t*4))*4)}X.textAlign="left";
+ var mv=mode==="play"&&(keys.w||keys.a||keys.s||keys.d||keys.arrowup||keys.arrowdown||keys.arrowleft||keys.arrowright),bob=mv?Math.abs(Math.sin(t*12))*2:0;
+ X.fillStyle="rgba(0,0,0,.35)";X.beginPath();X.ellipse(P.x,P.y+11,10,4,0,0,7);X.fill();glow(P.x,P.y,28,"#4fd1c5",.12);
+ rr(P.x-8,P.y-8-bob,16,19,7);X.fillStyle="#4fd1c5";X.fill();X.fillStyle="#f2b73f";X.fillRect(P.x-8,P.y-3-bob,16,3);X.fillStyle="#f3d3b0";X.beginPath();X.arc(P.x,P.y-12-bob,6,0,7);X.fill();X.fillStyle="#1b1630";X.beginPath();X.arc(P.x,P.y-13-bob,6.5,Math.PI,0);X.fill();X.fillRect(P.x-3,P.y-11-bob,1.5,2);X.fillRect(P.x+2,P.y-11-bob,1.5,2);
+ PT.forEach(function(q){if(q.l>0){q.x+=q.vx*DT;q.y+=q.vy*DT;q.vy+=120*DT;q.l-=DT*.9;glow(q.x,q.y,9*Math.max(q.l,0),q.c,q.l)}});
+ var n=near();if(n&&mode==="play"){var px=n.x+n.w/2;rr(px-62,n.y+n.h+10,124,24,12);X.fillStyle="rgba(10,8,30,.7)";X.fill();X.strokeStyle="rgba(255,255,255,.2)";X.stroke();
+  if(n.done){X.fillStyle="#f2eefc";X.font="600 12px Source Sans 3,system-ui,sans-serif";X.textAlign="center";X.fillText("Verdict hung",px,n.y+n.h+26)}else{rr(px-52,n.y+n.h+14,16,16,4);X.fillStyle="#f2b73f";X.fill();X.fillStyle="#1b1630";X.font="700 11px Sora,system-ui,sans-serif";X.textAlign="center";X.fillText("E",px-44,n.y+n.h+26);X.fillStyle="#f2eefc";X.font="600 12px Source Sans 3,system-ui,sans-serif";X.fillText("Inspect",px+8,n.y+n.h+26)}X.textAlign="left"}
+ var vg=X.createRadialGradient(480,300,220,480,300,720);vg.addColorStop(0,"rgba(5,3,20,0)");vg.addColorStop(1,"rgba(5,3,20,"+(.35+.3*nf)+")");X.fillStyle=vg;X.fillRect(0,0,960,540);
+ X.fillStyle=p<.25?"rgba(255,140,60,.08)":p>.8?"rgba(255,160,180,.08)":"rgba(20,30,90,.12)";X.fillRect(0,0,960,540);
+ var hh=Math.floor(m/60)%24,mm=Math.floor(m%60),h='<span class="pill">Lanterns '+S.map(function(s){return'<i class="dot '+(s.done?(s.ok?"ok":"bad"):"")+'"></i>'}).join("")+'</span><span class="pill">Points <b>'+pts+'</b></span><span class="pill">Shift <b>'+("0"+hh).slice(-2)+":"+("0"+mm).slice(-2)+"</b></span>";if(h!==hc){hc=h;hud.innerHTML=h}}
+mkBG();
+window.__g={S:S,P:P,openCase:openCase,st:function(){return{mode:mode,solved:solved,pts:pts}}};
+say("Noor","I'm Noor. Welcome to the night souk. Every lantern here is an ad the machines could not settle, and the stalls only open once someone reads them properly. Read the meaning, check the market, then rule. The clock only paints the sky. Take your time. Start in Spice Lane.",null,"Begin the shift");
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
