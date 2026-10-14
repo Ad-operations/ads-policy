@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Verdict Desk: Night Souk</title>
+<title>Verdict Desk: Middle East Version</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#14122a;--card:#221f3d;--ink:#f2eefc;--mut:#a9a3c9;--line:#40396b;--gold:#f2b73f;--ok:#58c79f;--bad:#ef8d7f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -54,7 +54,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;borde
 </head>
 <body>
 <main>
-<h1>Verdict Desk: Night Souk</h1>
+<h1>Verdict Desk: Middle East Version</h1>
 <div id="hud"></div><button id="fs" aria-label="Toggle full screen">Full screen (F)</button>
 <div id="wrap"><canvas id="c" width="1920" height="1080"></canvas><div id="ui"></div></div>
 <p class="note">Move with WASD or arrow keys. Press E or click a stall to inspect it. The shift clock is cosmetic and never penalizes slow, correct work. Scenarios are synthetic; verdicts follow Google policy text retrieved 11 Oct 2026, so confirm against live pages.</p>
@@ -165,7 +165,7 @@ function draw(t){X.setTransform(2,0,0,2,0,0);
  var hh=Math.floor(m/60)%24,mm=Math.floor(m%60),h='<span class="pill">Lanterns '+S.map(function(s){return'<i class="dot '+(s.done?(s.ok?"ok":"bad"):"")+'"></i>'}).join("")+'</span><span class="pill">Points <b>'+pts+'</b></span><span class="pill">Shift <b>'+("0"+hh).slice(-2)+":"+("0"+mm).slice(-2)+"</b></span>";if(h!==hc){hc=h;hud.innerHTML=h}}
 mkBG();
 window.__g={S:S,P:P,openCase:openCase,st:function(){return{mode:mode,solved:solved,pts:pts}}};
-say("Noor","I'm Noor. Welcome to the night souk. Every lantern here is an ad the machines could not settle, and the stalls only open once someone reads them properly. Read the meaning, check the market, then rule. The clock only paints the sky. Take your time. Start in Spice Lane.",null,"Begin the shift");
+say("Noor","I'm Noor. Welcome to the policy street. Every lantern here is an ad that Review Engine could not settle, and the stalls only open once someone reads them properly. Read the meaning, check the market, then rule. The clock only paints the sky. Take your time. Start in Alcohol lane.",null,"Begin");
 
 function tfs(){var d=document;if(d.fullscreenElement){d.exitFullscreen()}else if(d.documentElement.requestFullscreen){d.documentElement.requestFullscreen().catch(function(){})}}
 document.getElementById("fs").onclick=tfs;addEventListener("keydown",function(e){if(e.key==="f"||e.key==="F")tfs()});
